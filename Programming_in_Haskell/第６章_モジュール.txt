@@ -1,0 +1,35 @@
+第６章	モジュール
+
+§6.1 モジュールをインポートする
+§6.2 標準モジュールの関数で問題を解く
+§6.3 キーから値へのマッピング
+§6.4 モジュールを作ってみよう
+
+=====
+
+§6.1 モジュールをインポートする
+
+
+§6.2 標準モジュールの関数で問題を解く
+
+
+Prelude Data.List> words "aaa bbbb cccc"
+["aaa","bbbb","cccc"]
+
+
+*Main> tails "party"
+["party","arty","rty","ty","y",""]
+
+*Main> "hawaii" isPrefixOf "hawaii joe"
+
+<interactive>:15:1: error:
+    • Couldn't match expected type ‘([a0] -> [a0] -> Bool)
+                                    -> [Char] -> t’
+                  with actual type ‘[Char]’
+    • The function ‘"hawaii"’ is applied to two arguments,
+      but its type ‘[Char]’ has none
+      In the expression: "hawaii" isPrefixOf "hawaii joe"
+      In an equation for ‘it’: it = "hawaii" isPrefixOf "hawaii joe"
+    • Relevant bindings include it :: t (bound at <interactive>:15:1)
+*Main> "hawaii" `isPrefixOf` "hawaii joe"
+True

@@ -1,0 +1,22 @@
+第8章 入出力
+
+§8.1 不純なものと純粋なものを分離する
+§8.2 Hello, World!
+§8.3 I/O アクションどうしをまとめる
+§8.4 いくつかの便利なI/O関数
+§8.5 I/O アクションおさらい
+
+
+=====
+pureとimpure
+
+コンパイル
+% stack exec ghc -- --make helloworld
+
+
+Prelude> :t putStrLn 
+putStrLn :: String -> IO ()
+Prelude> :t putStrLn "hello"
+
+Prelude> :t getLine
+getLine :: IO String

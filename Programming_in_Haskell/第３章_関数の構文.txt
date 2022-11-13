@@ -1,0 +1,112 @@
+第３章_関数の構文.txt
+§3.1 パターンマッチ
+§3.2 場合分けして、きっりガード！
+§3.3 where?!
+§3.4 let it Be
+§3.5 case式
+
+=====
+§3.1 パターンマッチ
+=====
+
+タプルのパターンマッチ
+
+2つのベクトルの加算は、x成分とy成分をそれぞれ足し合わせる
+
+*Main> :t fst
+fst :: (a, b) -> a
+*Main> :t snd
+snd :: (a, b) -> b
+
+リストのパターンマッチとリスト内包表記
+*Main> let xs = [(1,3),(4,3),(2,4),(5,3),(5,6),(3,1)]
+*Main> [a + b | (a, b)<- xs]
+[4,7,6,8,11,4]
+*Main> [x*100+3 | (x, 3)<- xs]
+[103,403,503]
+
+error関数は文字列を引数ニトリ、その文字列を使ってランタイムエラーを発生させます。
+
+as パターン
+=====
+§3.2 場合分けして、きっりガード！
+
+引数の構造で場合分けするときにはパターンを使う
+引数の値が満たす性質で場合分けするときには、ガードを使う
+
+bmiTell :: Double -> String
+bmiTell bmi
+ | bmi <= 18.5 = "Youe're underweight, you emo, you!"
+ | bmi <= 25.0 = "You're supposedly normal.\
+                  \ Pffft, I bet you're ugly!"
+ | bmi <= 30.0 = "You're fat! Lose some weight, fattly!"
+ | otherwise   = "You're a whale, congratulations!"
+
+max' :: (Ord a) => a -> a -> a
+max' a b
+  | a <= b    = b
+  | otherwise = a
+
+
+Ordは順序をつけれるクラス
+
+
+compare関数もどき
+myCompare :: (Ord a) => a -> a -> Ordering
+a `myCompare` b
+  | a == b    = EQ
+  | a <= b    = LT
+  | otherwise = GT
+
+=====
+=====
+§3.3 where?!
+
+whereキーワードを使って計算の中間結果に名前をつける
+
+インデント！ 
+
+whereのスコープはその関数の中だけだから安心か
+
+違う関数からみれるようにするにはグローバルに定義する
+
+パターンマッチとwhere
+ファーストネームとラストネームを受け取ってイニシャルを返す関数
+
+initials :: String -> String -> String
+initials firstname lastname = [f] ++ ". " ++ [l] ++ "."
+ where (f:_) = firstname
+       (l:_) = lastname
+=====
+=====
+§3.4 let it Be
+=====
+
+*Main> [let square x = x * x in (square 5, square 3, square 2)]
+[(25,9,4)]
+
+*Main> (let a=100; b = 200;c = 300 in a*b*c,  let foo="Hey ";bar = "THERE! " in foo ++ bar)
+(6000000,"Hey THERE! ")
+
+*Main> (let (a, b, c)= (1,2,3) in a+b+c)*100
+600
+
+
+=====
+§3.5 case式
+=====
+
+=====
+=====
+=====
+=====
+=====
+=====
+=====
+=====
+=====
+=====
+=====
+=====
+=====
+=====

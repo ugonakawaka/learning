@@ -1,0 +1,383 @@
+第２章_型を信じろ！.txt
+
+% stack ghci
+
+明示的な型宣言
+
+Prelude> :t 'a'
+'a' :: Char
+Prelude> :t True
+True :: Bool
+Prelude> :t ('a', True)
+('a', True) :: (Char, Bool)
+
+::の記号は、「の型を持つ」と読む
+
+関数も型をもつ
+Prelude> removeNonUppercase st = [c | c <-st,  c `elem` ['A'..'Z']]
+Prelude> :t removeNonUppercase 
+removeNonUppercase :: [Char] -> [Char]
+
+Prelude> addThree x y z = x + y + z
+Prelude> addThree 1 2 3
+6
+Prelude> :t addThree 
+addThree :: Num a => a -> a -> a -> a
+
+引数と返り値の型は->で区切る
+返り値の型は、常に宣言の最後に置く
+
+型が決まらない状態なら
+型宣言なしで書いてあとで:tで確認する
+
+関数は式
+
+有界
+Intは有界、つまり最大値と最小値をもつ
+
+Integerは有界ではない
+
+REPL
+Prelude> factorial n = product [1..n]
+Prelude> :t factorial 
+factorial :: (Num a, Enum a) => a -> a
+Prelude> factorial 50
+30414093201713378043612608166064768844377641568960512000000000000
+
+hsファイル
+Prelude> :l a02.hs
+[1 of 1] Compiling Main             ( a02.hs, interpreted )
+Ok, one module loaded.
+*Main> factorial 50
+30414093201713378043612608166064768844377641568960512000000000000
+*Main> :t factorial 
+factorial :: Integer -> Integer
+
+*Main> :t circumference 
+circumference :: Float -> Float
+*Main> :t circumference 4
+*Main> circumference 4
+10.283186
+*Main> circumference' 4
+25.132741228718345
+*Main> :t circumference'
+circumference' :: Double -> Double
+
+タプルも型だよ！
+*Main> :t ()
+() :: ()
+*Main> :t (1)
+(1) :: Num p => p
+Main> :t (1,'a')
+(1,'a') :: Num a => (a, Char)
+*Main> :t (1,"abc")
+(1,"abc") :: Num a => (a, [Char])
+
+*Main> :t head
+head :: [a] -> a
+「任意の型リストを引数に取り、その型の要素を一つ返す」と読める
+
+aは、型変数
+型変数を用いた関数は多層的関数と呼ばれる
+
+Prelude> fst (1, 2)
+1
+Prelude> :t fst
+fst :: (a, b) -> a
+
+
+Prelude> fst' (a, b) = a
+Prelude> fst' 1 2
+
+<interactive>:6:1: error:
+    • Non type-variable argument in the constraint: Num (t1 -> t2, b)
+      (Use FlexibleContexts to permit this)
+    • When checking the inferred type
+        it :: forall t1 t2 b. (Num t1, Num (t1 -> t2, b)) => t2
+Prelude> fst' 1, 2
+
+<interactive>:7:7: error: parse error on input ‘,’
+Prelude> fst' (1, 2)
+1
+Prelude> :t fst'
+fst' :: (a, b) -> a
+
+型クラス
+インスタンス
+型クラスのメソッド
+「型クラスがあると何が嬉しいのか」を考えてみる
+
+
+型クラスの調べ方
+:i
+
+
+
+等値性演算子(==)
+Prelude> :t (==)
+(==) :: Eq a => a -> a -> Bool
+
+関数の名前が特殊文字からなる場合は、その関数はデフォルトで中置関数になる
+Prelude> :t +
+
+<interactive>:1:1: error: parse error on input ‘+’
+Prelude> :t (+)
+(+) :: Num a => a -> a -> a
+
+=>というシンボル
+このシンボルよりも前にあるものを型クラス制約という
+
+Eq型クラスは等値性をテストするためのインターフェイスを提供する
+
+Eq型クラス
+Eqのインスタンスが実装すべきは、==, /=
+
+Prelude> 1 == 1
+True
+Prelude> 1 /= 2
+True
+Prelude> 1 /= 1
+False
+
+Ord型クラス
+何らかの順序を付けられる型のための型クラス
+>,<,>=,<=
+
+Prelude> :t (>)
+(>) :: Ord a => a -> a -> Bool
+
+compare関数はOrdのインスタンスの型の引数を２つ取りOrderingを返します。
+GT,LT,EQを返す
+
+Prelude> "Abrakadabra" < "Zebra"
+True
+Prelude> "Abrakadabra" `compare` "Zebra"
+LT
+
+Prelude> 5 >= 2
+True
+Prelude> 5 `compare`  2
+GT
+
+Show型
+文字列型での表現に変換できる型
+
+一番よく使うのはshow
+指定した値を文字列として表示する
+
+Prelude> show "aaaa"
+"\"aaaa\""
+Prelude> show 3
+"3"
+
+Read型クラス
+ReadとShowは対をなす型クラス
+
+read関数は文字列を受け取り、Readのインスタンスの型の値を返します
+Prelude> :t read
+read :: Read a => String -> a
+Prelude> :t show
+show :: Show a => a -> String
+
+Prelude> read "True" || False
+True
+Prelude> read "True" && False
+False
+
+Prelude> read "1" + 1
+2
+Prelude> read "1.37" + 1
+*** Exception: Prelude.read: no parse
+Prelude> read "1.37" + 0.1
+1.4700000000000002
+
+Prelude> :t read
+read :: Read a => String -> a
+
+型注釈
+::を追記して型を指定する
+
+Prelude> read "4"
+*** Exception: Prelude.read: no parse
+Prelude> read "4" :: Int
+4
+Prelude> read "4" :: Float
+4.0
+
+haskellが型を推論してあげればよい
+Prelude> (read "4") + 3
+7
+
+Enum型クラス
+要素の値を列挙できる型
+後者関数succ
+前者関数pred
+
+Prelude> ['a'..'z']
+"abcdefghijklmnopqrstuvwxyz"
+Prelude> [LT..]
+
+<interactive>:61:6: error: parse error on input ‘]’
+Prelude> [LT..GT]
+
+<interactive>:62:2: error:
+    Not in scope: ‘LT..’
+    No module named ‘LT’ is imported.
+
+<interactive>:62:2: error:
+    A section must be enclosed in parentheses thus: (LT.. GT)
+Prelude> [LT .. GT]
+[LT,EQ,GT]
+Prelude> succ 'B'
+'C'
+Prelude> pred 'c'
+'b'
+Prelude> pred 'a'
+'`'
+=====
+Bounded型クラス
+上限と下限をもつ
+
+minBound
+maxBound
+
+多相定数
+Prelude> :t minBound 
+minBound :: Bounded a => a
+Prelude> :t maxBound 
+maxBound :: Bounded a => a
+
+IntがBoundedのインスタンスであることがわかる
+Prelude> :i Int
+type Int :: *
+data Int = GHC.Types.I# GHC.Prim.Int#
+        -- Defined in ‘GHC.Types’
+instance Eq Int -- Defined in ‘GHC.Classes’
+instance Ord Int -- Defined in ‘GHC.Classes’
+instance Enum Int -- Defined in ‘GHC.Enum’
+instance Num Int -- Defined in ‘GHC.Num’
+instance Real Int -- Defined in ‘GHC.Real’
+instance Show Int -- Defined in ‘GHC.Show’
+instance Read Int -- Defined in ‘GHC.Read’
+instance Bounded Int -- Defined in ‘GHC.Enum’
+instance Integral Int -- Defined in ‘GHC.Real’
+
+タプルのすべての構成要素がBoundedのインスタンスであるならば、そのタプル自身もBounded
+
+Prelude> minBound :: (Bool, Int, Char)
+(False,-9223372036854775808,'\NUL')
+
+
+=====
+Num型クラス
+
+数の型クラス
+実数を含むすべての数
+
+Prelude> :t 20
+20 :: Num p => p
+
+Prelude> :t (*)
+(*) :: Num a => a -> a -> a
+これは２つの数を受け取って１つの数を返すことをいっていて、３つの型がすべて同じ型であることをいっている
+なので、下記の結果となる
+
+Prelude> (1::Float) * 0.3
+0.3
+Prelude> (1::Int) * 0.3
+
+<interactive>:99:12: error:
+    • No instance for (Fractional Int) arising from the literal ‘0.3’
+    • In the second argument of ‘(*)’, namely ‘0.3’
+      In the expression: (1 :: Int) * 0.3
+      In an equation for ‘it’: it = (1 :: Int) * 0.3
+
+
+=====
+Floating型クラス
+
+浮動小数点
+Prelude> :i Floating 
+type Floating :: * -> Constraint
+class Fractional a => Floating a where
+  pi :: a
+  exp :: a -> a
+  log :: a -> a
+  sqrt :: a -> a
+  (**) :: a -> a -> a
+  logBase :: a -> a -> a
+  sin :: a -> a
+  cos :: a -> a
+  tan :: a -> a
+  asin :: a -> a
+  acos :: a -> a
+  atan :: a -> a
+  sinh :: a -> a
+  cosh :: a -> a
+  tanh :: a -> a
+  asinh :: a -> a
+  acosh :: a -> a
+  atanh :: a -> a
+  GHC.Float.log1p :: a -> a
+  GHC.Float.expm1 :: a -> a
+  GHC.Float.log1pexp :: a -> a
+  GHC.Float.log1mexp :: a -> a
+  {-# MINIMAL pi, exp, log, sin, cos, asin, acos, atan, sinh, cosh,
+              asinh, acosh, atanh #-}
+        -- Defined in ‘GHC.Float’
+instance Floating Float -- Defined in ‘GHC.Float’
+instance Floating Double -- Defined in ‘GHC.Float’
+
+=====
+Integral型クラス
+Numが実数を含むすべての数なのにたいして
+整数のみが含まれる
+
+Prelude> :t fromIntegral 
+fromIntegral :: (Integral a, Num b) => a -> b
+
+複数の型制約がある場合は、(,)で区切って括弧で囲みます
+
+fromIntegralは何らかの整数を引数にとり、もっと一般的な数を返す
+
+Prelude> length[1,2,3] * 3
+9
+Prelude> length[1,2,3] * 0.3
+
+<interactive>:125:17: error:
+    • No instance for (Fractional Int) arising from the literal ‘0.3’
+    • In the second argument of ‘(*)’, namely ‘0.3’
+      In the expression: length [1, 2, 3] * 0.3
+      In an equation for ‘it’: it = length [1, 2, 3] * 0.3
+Prelude> fromIntegral (length[1,2,3]) * 0.3
+0.8999999999999999
+
+
+
+Prelude> :i Integral
+type Integral :: * -> Constraint
+class (Real a, Enum a) => Integral a where
+  quot :: a -> a -> a
+  rem :: a -> a -> a
+  div :: a -> a -> a
+  mod :: a -> a -> a
+  quotRem :: a -> a -> (a, a)
+  divMod :: a -> a -> (a, a)
+  toInteger :: a -> Integer
+  {-# MINIMAL quotRem, toInteger #-}
+        -- Defined in ‘GHC.Real’
+instance Integral Word -- Defined in ‘GHC.Real’
+instance Integral Integer -- Defined in ‘GHC.Real’
+instance Integral Int -- Defined in ‘GHC.Real’
+=====
+型クラスに関する注意
+
+型クラスは抽象的なインターフェイスとして定義されている
+1つの型はいくつもの型クラスのインスタンスになることができる
+1つの型クラスはいくつもの型をインスタンスとして持てる
+
+型をある型クラスのインスタンスにするためには、いったん別のインスタンスにする必要があることがある
+例）Ordクラスのインスタンスにするには、先にEqクラスのインスタンスである必要がある
+
+
+=====
