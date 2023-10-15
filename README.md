@@ -1,2 +1,2 @@
-# learning-to
-お勉強用
+# learning
+がんばっていくぞい お勉強用
